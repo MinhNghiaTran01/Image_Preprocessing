@@ -417,6 +417,72 @@ def closing():
     return render_template('index.html', img_data=img_str, title="Biến đổi Closing", algorithm="Biến đổi Closing",
                             purpose=purpose, defaultImg=path)
 
+@app.route('/logarithm')
+def logarithm():
+    path = 'static/image2.jpg'
+    # Đọc ảnh từ file
+    image = cv2.imread(path)
+
+    # Áp dụng bộ lọc logarithm
+    c = 255 / np.log(1 + np.max(image))
+    logarithm_image = c * np.log(1 + image)
+
+    # Điều chỉnh kiểu dữ liệu và đảm bảo giá trị pixel nằm trong phạm vi [0, 255]
+    logarithm_image = np.array(logarithm_image, dtype = np.uint8)
+
+    # Chuyển ảnh sang dạng base64 để truyền qua HTML
+    _, buffer = cv2.imencode('.png', logarithm_image)
+    img_str = base64.b64encode(buffer).decode('utf-8')
+
+    purpose = """Bộ lọc logarithm được sử dụng để tăng cường độ sáng của ảnh một cách không tuyến tính, giúp cải thiện độ tương phản. Nó hoạt động bằng cách áp dụng hàm logarit lên các giá trị pixel, giúp làm nổi bật các chi tiết ở các vùng tối."""
+
+    return render_template('index.html', img_data=img_str, title="Bộ lọc Logarithm", algorithm="Bộ lọc Logarithm",
+                           purpose=purpose, defaultImg=path)
+@app.route('/gamma')
+def gamma():
+    path = 'static/image2.jpg'
+    # Đọc ảnh từ file
+    image = cv2.imread(path)
+
+    # Gamma correction
+    gamma = 1.5
+    gamma_correction = np.array(255 * (image / 255) ** gamma, dtype='uint8')
+
+    # Chuyển ảnh sang dạng base64 để truyền qua HTML
+    _, buffer = cv2.imencode('.png', gamma_correction)
+    img_str = base64.b64encode(buffer).decode('utf-8')
+
+    purpose = """Bộ lọc gamma được sử dụng để điều chỉnh độ sáng và độ tương phản của ảnh. Nó hoạt động bằng cách áp dụng công thức điều chỉnh gamma lên từng pixel, giúp tăng cường hoặc giảm bớt độ sáng và tương phản của ảnh một cách linh hoạt."""
+
+    return render_template('index.html', img_data=img_str, title="Điều chỉnh Gamma", algorithm="Bộ lọc Gamma",
+                           purpose=purpose, defaultImg=path)
+
+@app.route('/balance')
+def balance():
+    path = 'static/image2.jpg'
+    # Đọc ảnh từ file
+    image = cv2.imread(path)
+
+    # Tách các kênh màu
+    (B, G, R) = cv2.split(image)
+
+    # Áp dụng histogram equalization lên mỗi kênh màu
+    R = cv2.equalizeHist(R)
+    G = cv2.equalizeHist(G)
+    B = cv2.equalizeHist(B)
+
+    # Gộp các kênh màu lại
+    balanced_image = cv2.merge([B, G, R])
+
+    # Chuyển ảnh sang dạng base64 để truyền qua HTML
+    _, buffer = cv2.imencode('.png', balanced_image)
+    img_str = base64.b64encode(buffer).decode('utf-8')
+
+    purpose = """Bộ lọc cân bằng màu được sử dụng để điều chỉnh màu sắc của ảnh sao cho trở nên tự nhiên hơn. Nó thường được thực hiện bằng cách điều chỉnh độ phân bố màu sắc trên mỗi kênh màu (đỏ, xanh lá, xanh dương) để chúng đồng đều hơn."""
+
+    return render_template('index.html', img_data=img_str, title="Balance", algorithm="Balance",
+                           purpose=purpose, defaultImg=path)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
